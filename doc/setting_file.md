@@ -3,25 +3,34 @@
 
 为了能够利用 json 表示水印的组成，这里预先设计一点儿规则，用来指导后期编程。
 
-```JSON
+```json
 {
     "water_marking":[
         {
             "type":"img",
             "content":"src",
-            "size": [300, 200],       // 尺寸 [width, height]
-            "pos": [100, 100],        // 位置 [相对坐标]
-            "anchor":"left-upper/left-middle/left-bottom/center-upper/center-middle/center-bottom/right-upper/right-middle/right-bottom"    // 坐标原点(相对于目标图片)
+            "size": [300, 200],             // 尺寸 [width, height]
+            "relative":"none/width/height", // 是否使用相对大小描述方式
+            "relative_size":0.3,                 // 相对大小
+            "pos": [100, 100],              // 位置 [相对坐标]
+            "alpha":128,                    // 水印图片的合并半透明
+            "relative_pos":false,
+            "rotation":90,                  // 旋转值
         },
         {
             "type":"text",
             "content":"XXX摄",
             "size":24,                    // 字体大小，初步估计使用 point size
+            "relative":"none/width/height", // 是否使用相对大小描述方式
+            "relative_size":0.3,                 // 相对大小
+            "pos": [100, 100],            // 位置 [相对坐标]
+            "relative_pos":false,
+            "rotation":90,                // 旋转值
             "font":"font-family",         // 首先允许选择特定的字体吧
             "color":[255,255,255,255],    // RGBA of Text
             "italic":false,               // 表示是否斜体
             "bold":false,                 // 表示是否加粗
-            "underline":false             // 表示是否下划线
+            "underline":false,             // 表示是否下划线
         }
     ]
 }

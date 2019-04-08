@@ -31,17 +31,37 @@ UI_DIR = ./ui          # ui_xxx 文件存放位置
 CONFIG += c++11
 
 # include
-INCLUDEPATH += $$PWD
+INCLUDEPATH += $$PWD \
+    E:/libs/opencv-3.4.5/mingw730_release/install/include
 
 # libs
-#LIBS +=
+
+#CONFIG(debug,debug|release){
+#LIBS+= \
+#    -LE:/libs/opencv-3.4.5/mingw730_release/install/x64/mingw/lib -lopencv_core345 -lopencv_imgproc345
+
+#}
+CONFIG(release,debug|release){
+LIBS+= \
+    -LE:/libs/opencv-3.4.5/mingw730_release/install/x64/mingw/lib -lopencv_core345 -lopencv_imgproc345
+}
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    watermark/watermark.cpp \
+    watermark/imgwatermark.cpp \
+    watermark/textwatermark.cpp \
+    watermark/watermarkfactory.cpp \
+    watermark/tools.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    watermark/watermark.h \
+    watermark/imgwatermark.h \
+    watermark/textwatermark.h \
+    watermark/watermarkfactory.h \
+    watermark/tools.h
 
 FORMS += \
         mainwindow.ui

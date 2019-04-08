@@ -1,0 +1,30 @@
+{
+    "water_marking":[
+        {
+            "type":"img",
+            "content":"src",
+            "size": [300, 200],             
+            "relative":"width", 
+            "relative_size":0.3,                 
+            "pos": [100, 100],
+            "alpha":128,     
+            "relative_pos":false,         
+            "rotation":90                    
+        },
+        {
+            "type":"text",
+            "content":"XXX摄",
+            "size":24,                    
+            "relative":"none/width/height", 
+            "relative_size":0.3,                 
+            "pos": [100, 100],      
+            "relative_pos":false,      
+            "rotation":90,                
+            "font":"font-family",         
+            "color":[255,255,255,255],    
+            "italic":false,               
+            "bold":false,                 
+            "underline":false               
+        }
+    ]
+}
