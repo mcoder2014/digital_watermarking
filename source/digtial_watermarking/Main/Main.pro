@@ -36,14 +36,14 @@ INCLUDEPATH += $$PWD \
 
 # libs
 
-#CONFIG(debug,debug|release){
-#LIBS+= \
-#    -LE:/libs/opencv-3.4.5/mingw730_release/install/x64/mingw/lib -lopencv_core345 -lopencv_imgproc345
+CONFIG(debug,debug|release){
+LIBS+= \
+    -LE:/libs/opencv-3.4.5/mingw730_debug/install/x64/mingw/lib -lopencv_core345d -lopencv_imgproc345d
 
-#}
+}
 CONFIG(release,debug|release){
 LIBS+= \
-    -LE:/libs/opencv-3.4.5/mingw730_release/install/x64/mingw/lib -lopencv_core345 -lopencv_imgproc345
+    -LE:/libs/opencv-3.4.5/mingw730_release/install/x64/mingw/lib -lopencv_world345
 }
 
 SOURCES += \

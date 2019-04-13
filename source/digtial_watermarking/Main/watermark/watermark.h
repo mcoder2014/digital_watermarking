@@ -8,16 +8,13 @@
 class Watermark
 {
 public:
-    enum Anchor{LEFT_UPPER,LEFT_MIDDLE,LEFT_BOTTOM,
-               CENTER_UPPER,CENTER_MIDDLE,CENTER_BOTTOM,
-               RIGHT_UPPER,RIGHT_MIDDLE,RIGHT_BOTTOM};      // 相对图片的锚点
     enum Relative{NONE,WIDTH,HEIGHT};                       // 相对尺寸的
 
     Watermark();
     ~Watermark();
     virtual void execute(cv::Mat& src, cv::Mat& dst) = 0;   // 执行添加水印方法-对目标图像加水印
     virtual void print() = 0;                                   // 输出参数信息
-    void setPos(float x, float y){this->_x = x; this->_y = y;}
+    void setPos(float x, float y){this->_x = x; this->_y = y; this->_is_update = true;}
 
     float x() const;
     float y() const;
@@ -44,6 +41,8 @@ protected:
     std::string _content;    // 内容
     Relative _relative;      // 是否相对尺寸
     float _relative_size;    // 相对尺寸
+
+    bool _is_update;         // 是否更新了设置
 
 };
 

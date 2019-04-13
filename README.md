@@ -1,6 +1,6 @@
 # 水印工具
 
-![GitHub stars](https://img.shields.io/github/stars/mcoder2014/digital_watermarking.svg?style=social)
+[![GitHub stars](https://img.shields.io/github/stars/mcoder2014/digital_watermarking.svg?style=social)](https://github.com/mcoder2014/digital_watermarking)
 
 本项目的主要目的是提供一种方便的为创作者的作品添加水印的工具，用来帮助创作者标注版权并且提供数字水印功能来给创作者一个可以追溯盗图等行为的能力(直接的盗图：如裁剪、简单调色等，大范围的PS及重创作无法验证水印)。
 

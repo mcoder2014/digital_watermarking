@@ -23,11 +23,14 @@ public:
     void setAlpha(int alpha);
 
 private:
-    int _size_width;        // 如果不使用相对尺寸，则使用绝对尺寸
-    int _size_height;       // 如果不使用相对尺寸，则使用相对尺寸
-    int _alpha;             // 设置水印的半透明
+    int _size_width;        // Size width, if(relative == true) this is relative width, otherwise absolute width
+    int _size_height;       // Just like size_width
+    int _alpha;             // To set the transparent of watermark ROI
 
-    cv::Mat _watermark;     // 加载到的原本的水印图片
+    cv::Mat _watermark;     // The source image of watermark content.
+    cv::Mat _modifiedWatermark; // the watermark mat modified based on the description.
+
+    void _updateWatermarkMat();
 };
 
 #endif // IMGWATERMARK_H
