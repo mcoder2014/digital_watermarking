@@ -20,7 +20,7 @@ float Watermark::y() const
     return _y;
 }
 
-int Watermark::getRotation() const
+int Watermark::rotation() const
 {
     return _rotation;
 }
@@ -31,7 +31,7 @@ void Watermark::setRotation(int value)
     this->_is_update = true;
 }
 
-std::string Watermark::getContent() const
+std::string Watermark::content() const
 {
     return _content;
 }
@@ -42,7 +42,7 @@ void Watermark::setContent(const std::string &value)
     this->_is_update = true;
 }
 
-Watermark::Relative Watermark::getRelative() const
+Watermark::Relative Watermark::relative() const
 {
     return _relative;
 }
@@ -53,7 +53,7 @@ void Watermark::setRelative(const Relative &relative)
     this->_is_update = true;
 }
 
-float Watermark::getRelative_size() const
+float Watermark::relative_size() const
 {
     return _relative_size;
 }
@@ -64,7 +64,7 @@ void Watermark::setRelative_size(float relative_size)
     this->_is_update = true;
 }
 
-bool Watermark::getRelative_pos() const
+bool Watermark::relative_pos() const
 {
     return _relative_pos;
 }

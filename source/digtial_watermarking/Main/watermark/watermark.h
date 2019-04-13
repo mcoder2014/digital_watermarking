@@ -14,24 +14,25 @@ public:
     ~Watermark();
     virtual void execute(cv::Mat& src, cv::Mat& dst) = 0;   // 执行添加水印方法-对目标图像加水印
     virtual void print() = 0;                                   // 输出参数信息
+    virtual std::string type(){return std::string("Watermark");}
     void setPos(float x, float y){this->_x = x; this->_y = y; this->_is_update = true;}
 
     float x() const;
     float y() const;
 
-    int getRotation() const;
+    int rotation() const;
     void setRotation(int value);
 
-    std::string getContent() const;
+    std::string content() const;
     virtual void setContent(const std::string &value);
 
-    Relative getRelative() const;
+    Relative relative() const;
     void setRelative(const Relative &relative);
 
-    float getRelative_size() const;
+    float relative_size() const;
     void setRelative_size(float relative_size);
 
-    bool getRelative_pos() const;
+    bool relative_pos() const;
     void setRelative_pos(bool relative_pos);
 
 protected:

@@ -87,14 +87,20 @@ void ImgWatermark::execute(cv::Mat &src, cv::Mat &dst)
     // Image merge of Photoshop
     // Reference: https://blog.csdn.net/chy555chy/article/details/54016317
     cv::Mat Roi = dst(cv::Rect(dst_x,dst_y,tmp.size().width,tmp.size().height));
-    cv::Mat Roi_copy = Roi.clone();
     float alpha = this->_alpha/100.0;       // 0-100
 
-    cv::addWeighted(Roi,(1-alpha), tmp,alpha, 0,Roi_copy);
-    std::vector<cv::Mat> channels;
-    cv::split(tmp, channels);
-
-    Roi_copy.copyTo(Roi, channels[3]);      // merge using BGRA's A channel as mask
+    // Reference: http://accu.cc/content/pil/watermark
+    for(int i=0; i< tmp.rows; i++)
+    {
+        for(int j=0; j<tmp.cols; j++)
+        {
+            cv::Vec4b dst_pixel = Roi.at<cv::Vec4b>(i,j);
+            cv::Vec4b wm_pixel = tmp.at<cv::Vec4b>(i,j);
+            float real_alpha = alpha * (wm_pixel[3]/255);
+            dst_pixel = (1-real_alpha)*dst_pixel + real_alpha * wm_pixel;
+            Roi.at<cv::Vec4b>(i,j) = dst_pixel;
+        }
+    }
 
 }
 

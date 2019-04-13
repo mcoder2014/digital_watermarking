@@ -8,6 +8,7 @@ class TextWatermark : public Watermark
 public:
     TextWatermark();
     void execute(cv::Mat& src, cv::Mat& dst);
+    virtual std::string type(){return std::string("TextWatermark");}
     void print();
 };
 

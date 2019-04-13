@@ -53,7 +53,9 @@ SOURCES += \
     watermark/imgwatermark.cpp \
     watermark/textwatermark.cpp \
     watermark/watermarkfactory.cpp \
-    watermark/tools.cpp
+    watermark/tools.cpp \
+    watermark/lsbimgwatermark.cpp \
+    watermark/unvisiblewatermark.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -61,7 +63,9 @@ HEADERS += \
     watermark/imgwatermark.h \
     watermark/textwatermark.h \
     watermark/watermarkfactory.h \
-    watermark/tools.h
+    watermark/tools.h \
+    watermark/lsbimgwatermark.h \
+    watermark/unvisiblewatermark.h
 
 FORMS += \
         mainwindow.ui

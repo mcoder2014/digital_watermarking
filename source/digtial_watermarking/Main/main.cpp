@@ -21,9 +21,17 @@ int main(int argc, char *argv[])
     QImage src("testimg.jpg");
     cv::Mat mat = QImage2cvMat(src);
 
-    watermarks[0]->execute(mat,mat);
+    cv::Mat imgW;
+    cv::Mat lsbW;
+    watermarks[0]->execute(mat,imgW);
+    watermarks[1]->execute(mat,lsbW);
 
-    DEBUG_SAVE_MAT(mat, "debug/AfterWatermark.png");
+    DEBUG_SAVE_MAT(imgW, "debug/imgWatermark.png");
+    DEBUG_SAVE_MAT(lsbW, "debug/lsbWatermark.png");
+
+    cv::Mat lsbCheck;
+    static_cast<LSBImgWatermark*>(watermarks[1].get())->checkWatermark(lsbW, lsbCheck);
+    DEBUG_SAVE_MAT(lsbCheck, "debug/lsbCheck.png");
 
     return a.exec();
 }

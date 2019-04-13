@@ -6,7 +6,8 @@ class ImgWatermark : public Watermark
 {
 public:
     ImgWatermark();
-    void execute(cv::Mat& src, cv::Mat& dst);
+    virtual void execute(cv::Mat& src, cv::Mat& dst);
+    virtual std::string type(){return std::string("ImgWatermark");}
     void print();
 
     void setContent(const std::string &value);
@@ -22,7 +23,7 @@ public:
     int alpha() const;
     void setAlpha(int alpha);
 
-private:
+protected:
     int _size_width;        // Size width, if(relative == true) this is relative width, otherwise absolute width
     int _size_height;       // Just like size_width
     int _alpha;             // To set the transparent of watermark ROI

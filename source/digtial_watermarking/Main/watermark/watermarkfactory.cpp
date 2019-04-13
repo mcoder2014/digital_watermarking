@@ -37,6 +37,10 @@ std::vector<std::shared_ptr<Watermark> > WatermarkFactory::loadWatermark(const Q
         {
 
         }
+        else if(type == QString("lsb"))
+        {
+            watermarks.push_back(this->getLSBImageWatermark(obj));
+        }
         else
         {
             qWarning() << "Type: " << type << "is not known!";
@@ -117,5 +121,28 @@ std::shared_ptr<ImgWatermark> WatermarkFactory::getImgWatermark(QJsonObject &jso
 std::shared_ptr<TextWatermark> WatermarkFactory::getTextWatermark(QJsonObject &json_obj)
 {
 
+}
+
+std::shared_ptr<LSBImgWatermark> WatermarkFactory::getLSBImageWatermark(QJsonObject &json_obj)
+{
+    std::shared_ptr<ImgWatermark> p = this->getImgWatermark(json_obj);
+    std::shared_ptr<LSBImgWatermark> lsb = std::make_shared<LSBImgWatermark>();
+    if(json_obj.contains("bits"))
+    {
+        lsb->setBits(json_obj["bits"].toInt());
+    }
+
+    // Copy info, will change to copy constructor soon.
+    lsb->setPos(p->x(), p->y());
+    lsb->setAlpha(p->alpha());
+    lsb->setContent(p->content());
+    lsb->setRelative(p->relative());
+    lsb->setRotation(p->rotation());
+    lsb->setSize_width(p->size_width());
+    lsb->setSize_height(p->size_height());
+    lsb->setRelative_pos(p->relative_pos());
+    lsb->setRelative_size(p->relative_size());
+
+    return lsb;
 }
 

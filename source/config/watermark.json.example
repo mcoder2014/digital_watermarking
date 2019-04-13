@@ -25,6 +25,18 @@
             "italic":false,               
             "bold":false,                 
             "underline":false               
+        }，
+        {
+            "type":"lsb",
+            "bits":2,
+            "content":"src",
+            "size": [300, 200],             
+            "relative":"width", 
+            "relative_size":0.3,                 
+            "pos": [100, 100],
+            "alpha":128,     
+            "relative_pos":false,         
+            "rotation":90                    
         }
     ]
 }

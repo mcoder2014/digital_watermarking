@@ -4,10 +4,13 @@
 #include <vector>
 #include <memory>
 
+#include <QJsonDocument>
+
 #include "watermark.h"
 #include "imgwatermark.h"
 #include "textwatermark.h"
-#include <QJsonDocument>
+#include "lsbimgwatermark.h"
+
 
 class WatermarkFactory
 {
@@ -17,6 +20,7 @@ public:
 private:
     std::shared_ptr<ImgWatermark> getImgWatermark(QJsonObject& json_obj);
     std::shared_ptr<TextWatermark> getTextWatermark(QJsonObject &json_obj);
+    std::shared_ptr<LSBImgWatermark> getLSBImageWatermark(QJsonObject &json_obj);
 
 };
 
