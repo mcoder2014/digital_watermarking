@@ -41,7 +41,8 @@ win32 {
 
     CONFIG(debug,debug|release) {
     LIBS+= \
-        -LE:/libs/opencv-3.4.5/mingw730_debug/install/x64/mingw/lib -lopencv_core345d -lopencv_imgproc345d
+        -LE:/libs/opencv-3.4.5/mingw730_debug/install/x64/mingw/lib -lopencv_core345d -lopencv_imgproc345d \
+            -lopencv_photo345d
 
     }
 
@@ -58,7 +59,7 @@ unix {
 message($$INCLUDEPATH)
 
     LIBS+= \
-        -L/usr/lib64 -lopencv_core -lopencv_imgproc
+        -L/usr/lib64 -lopencv_core -lopencv_imgproc -lopencv_photo
 }
 
 
@@ -71,7 +72,9 @@ SOURCES += \
     watermark/watermarkfactory.cpp \
     watermark/tools.cpp \
     watermark/lsbimgwatermark.cpp \
-    watermark/unvisiblewatermark.cpp
+    watermark/unvisiblewatermark.cpp \
+    watermark/fftimgwatermark.cpp \
+    watermark/possionimgwatermark.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -81,7 +84,9 @@ HEADERS += \
     watermark/watermarkfactory.h \
     watermark/tools.h \
     watermark/lsbimgwatermark.h \
-    watermark/unvisiblewatermark.h
+    watermark/unvisiblewatermark.h \
+    watermark/fftimgwatermark.h \
+    watermark/possionimgwatermark.h
 
 FORMS += \
         mainwindow.ui

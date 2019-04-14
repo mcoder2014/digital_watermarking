@@ -43,7 +43,17 @@
             "alpha":128,                    // 水印图片的合并半透明
             "relative_pos":false,
             "rotation":90,                  // 旋转值
-        }
+        },
+        {
+            "type":"possion",               // possion无缝水印
+            "content":"src",                // 水印文件的路径
+            "size": [300, 200],             // 尺寸 [width, height]
+            "relative":"none/width/height", // 是否使用相对大小描述方式
+            "relative_size":0.3,            // 相对大小
+            "pos": [100, 100],              // 位置 [相对坐标]
+            "relative_pos":false,
+            "rotation":90,                  // 旋转值
+        },
     ]
 }
 ```

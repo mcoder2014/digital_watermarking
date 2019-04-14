@@ -10,6 +10,7 @@
 #include "imgwatermark.h"
 #include "textwatermark.h"
 #include "lsbimgwatermark.h"
+#include "possionimgwatermark.h"
 
 
 class WatermarkFactory
@@ -20,7 +21,8 @@ public:
 private:
     std::shared_ptr<ImgWatermark> getImgWatermark(QJsonObject& json_obj);
     std::shared_ptr<TextWatermark> getTextWatermark(QJsonObject &json_obj);
-    std::shared_ptr<LSBImgWatermark> getLSBImageWatermark(QJsonObject &json_obj);
+    std::shared_ptr<LSBImgWatermark> getLSBImgWatermark(QJsonObject &json_obj);
+    std::shared_ptr<PossionImgWatermark> getPossionImgWatermark(QJsonObject &json_obj);
 
 };
 

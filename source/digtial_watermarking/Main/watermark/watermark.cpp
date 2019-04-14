@@ -2,7 +2,13 @@
 
 Watermark::Watermark():_is_update(false)
 {
-
+    this->_x=0;
+    this->_y=0;
+    this->_content="";
+    this->_relative = NONE;
+    this->_rotation = 0;
+    this->_relative_pos = false;
+    this->_relative_size = 0;
 }
 
 Watermark::~Watermark()

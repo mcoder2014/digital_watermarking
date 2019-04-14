@@ -7,9 +7,9 @@
 
 #include "tools.h"
 
-LSBImgWatermark::LSBImgWatermark()
+LSBImgWatermark::LSBImgWatermark():ImgWatermark ()
 {
-
+    this->_bits = 2;
 }
 
 void LSBImgWatermark::execute(cv::Mat &src, cv::Mat &dst)

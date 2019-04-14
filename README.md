@@ -34,3 +34,5 @@
 # Reference
 1. [瞎搞搞-数字水印（待填坑）](https://mcoder.cc/2019/04/07/digital_watermarking/)
 2. [频域手段添加数字盲水印的方法](https://www.zhihu.com/question/50735753)
+3. [隐写术：基于2D-FFT的图像数字水印技术](https://zhuanlan.zhihu.com/p/41306815)
+4. [Yuxfei/Digital-Image-Watermark](https://github.com/Yuxfei/Digital-Image-Watermark)

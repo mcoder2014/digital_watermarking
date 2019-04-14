@@ -7,9 +7,11 @@
 
 #include "tools.h"
 
-ImgWatermark::ImgWatermark()
+ImgWatermark::ImgWatermark():Watermark ()
 {
-
+    this->_alpha = 100;
+    this->_size_width = 100;
+    this->_size_height = 100;
 }
 
 ///
@@ -205,5 +207,5 @@ void ImgWatermark::_updateWatermarkMat()
         this->_modifiedWatermark.convertTo(this->_modifiedWatermark, CV_8UC4);
     }
 
-    DEBUG_SAVE_MAT(_modifiedWatermark, "debug/modifiedWatermark.png");
+//    DEBUG_SAVE_MAT(_modifiedWatermark, "debug/modifiedWatermark.png");
 }

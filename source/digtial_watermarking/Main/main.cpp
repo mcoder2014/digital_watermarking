@@ -23,16 +23,24 @@ int main(int argc, char *argv[])
 
     cv::Mat imgW;
     cv::Mat lsbW;
-    watermarks[0]->execute(mat,imgW);
-    watermarks[1]->execute(mat,lsbW);
+    cv::Mat possionW;
 
+    watermarks[0]->execute(mat,imgW);
     DEBUG_SAVE_MAT(imgW, "debug/imgWatermark.png");
+
+    watermarks[1]->execute(mat,lsbW);
     DEBUG_SAVE_MAT(lsbW, "debug/lsbWatermark.png");
 
+    watermarks[2]->execute(mat, possionW);
+    DEBUG_SAVE_MAT(possionW, "debug/possionImgWatermark.png");
+
+
+    // Check
     cv::Mat lsbCheck;
     static_cast<LSBImgWatermark*>(watermarks[1].get())->checkWatermark(lsbW, lsbCheck);
     DEBUG_SAVE_MAT(lsbCheck, "debug/lsbCheck.png");
 
+    /*--------------------------*/
     return a.exec();
 }
 

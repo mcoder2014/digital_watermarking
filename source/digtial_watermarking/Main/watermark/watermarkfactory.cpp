@@ -39,7 +39,11 @@ std::vector<std::shared_ptr<Watermark> > WatermarkFactory::loadWatermark(const Q
         }
         else if(type == QString("lsb"))
         {
-            watermarks.push_back(this->getLSBImageWatermark(obj));
+            watermarks.push_back(this->getLSBImgWatermark(obj));
+        }
+        else if(type == QString("possion"))
+        {
+            watermarks.push_back(this->getPossionImgWatermark(obj));
         }
         else
         {
@@ -123,7 +127,25 @@ std::shared_ptr<TextWatermark> WatermarkFactory::getTextWatermark(QJsonObject &j
 
 }
 
-std::shared_ptr<LSBImgWatermark> WatermarkFactory::getLSBImageWatermark(QJsonObject &json_obj)
+std::shared_ptr<PossionImgWatermark> WatermarkFactory::getPossionImgWatermark(QJsonObject &json_obj)
+{
+    std::shared_ptr<ImgWatermark> p = this->getImgWatermark(json_obj);
+    std::shared_ptr<PossionImgWatermark> possion = std::make_shared<PossionImgWatermark>();
+
+    possion->setPos(p->x(), p->y());
+    possion->setAlpha(p->alpha());
+    possion->setContent(p->content());
+    possion->setRelative(p->relative());
+    possion->setRotation(p->rotation());
+    possion->setSize_width(p->size_width());
+    possion->setSize_height(p->size_height());
+    possion->setRelative_pos(p->relative_pos());
+    possion->setRelative_size(p->relative_size());
+
+    return possion;
+}
+
+std::shared_ptr<LSBImgWatermark> WatermarkFactory::getLSBImgWatermark(QJsonObject &json_obj)
 {
     std::shared_ptr<ImgWatermark> p = this->getImgWatermark(json_obj);
     std::shared_ptr<LSBImgWatermark> lsb = std::make_shared<LSBImgWatermark>();
