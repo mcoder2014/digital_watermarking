@@ -17,8 +17,7 @@ public:
     void setRotational_symmetry(bool rotational_symmetry);
 
 protected:
-    bool _rotational_symmetry;     // 图像的水印是否中心对称
-
+    bool _rotational_symmetry;     // whether the watermark in fft space is rotational symmetry
 };
 
 #endif // FFTIMGWATERMARK_H

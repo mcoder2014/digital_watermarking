@@ -11,6 +11,7 @@
 #include "textwatermark.h"
 #include "lsbimgwatermark.h"
 #include "possionimgwatermark.h"
+#include "fftimgwatermark.h"
 
 
 class WatermarkFactory

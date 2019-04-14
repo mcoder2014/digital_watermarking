@@ -27,4 +27,5 @@ TextWatermark
 
 ## 频域水印
 `FFTImgWatermark`: 将水印与傅里叶变换后的图像的频域相叠加。
+[FFT](https://blog.csdn.net/keith_bb/article/details/53389819)
 
