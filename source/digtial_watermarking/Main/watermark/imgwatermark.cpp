@@ -194,10 +194,10 @@ void ImgWatermark::_updateWatermarkMat()
     switch (this->_modifiedWatermark.type())
     {
     case CV_8UC1:
-        cv::cvtColor(this->_modifiedWatermark,this->_modifiedWatermark,CV_GRAY2BGRA);
+        cv::cvtColor(this->_modifiedWatermark,this->_modifiedWatermark,cv::COLOR_GRAY2BGRA);
         break;
     case CV_8UC3:
-        cv::cvtColor(this->_modifiedWatermark, this->_modifiedWatermark,CV_BGR2BGRA);
+        cv::cvtColor(this->_modifiedWatermark, this->_modifiedWatermark,cv::COLOR_BGR2BGRA);
         break;
     case CV_8UC4:
         break;

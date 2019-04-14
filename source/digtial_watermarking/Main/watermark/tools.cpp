@@ -72,7 +72,7 @@ cv::Mat QImage2cvMat(QImage& image)
                     CV_8UC3,
                     (void*)image.constBits(),
                     image.bytesPerLine());
-        cv::cvtColor(mat, mat, CV_BGR2RGBA);
+        cv::cvtColor(mat, mat, cv::COLOR_BGR2RGBA);
         break;
     case QImage::Format_Indexed8:
 //    case QImage::Format_Grayscale8:

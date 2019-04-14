@@ -30,21 +30,37 @@ UI_DIR = ./ui          # ui_xxx 文件存放位置
 
 CONFIG += c++11
 
-# include
-INCLUDEPATH += $$PWD \
-    E:/libs/opencv-3.4.5/mingw730_release/install/include
+
 
 # libs
 
-CONFIG(debug,debug|release){
-LIBS+= \
-    -LE:/libs/opencv-3.4.5/mingw730_debug/install/x64/mingw/lib -lopencv_core345d -lopencv_imgproc345d
+win32 {
+    # include
+    INCLUDEPATH += $$PWD \
+        E:/libs/opencv-3.4.5/mingw730_release/install/include
 
+    CONFIG(debug,debug|release) {
+    LIBS+= \
+        -LE:/libs/opencv-3.4.5/mingw730_debug/install/x64/mingw/lib -lopencv_core345d -lopencv_imgproc345d
+
+    }
+
+    CONFIG(release,debug|release) {
+    LIBS+= \
+        -LE:/libs/opencv-3.4.5/mingw730_release/install/x64/mingw/lib -lopencv_world345
+    }
 }
-CONFIG(release,debug|release){
-LIBS+= \
-    -LE:/libs/opencv-3.4.5/mingw730_release/install/x64/mingw/lib -lopencv_world345
+
+unix {
+    INCLUDEPATH += $$PWD \
+        /usr/include/opencv4/
+
+message($$INCLUDEPATH)
+
+    LIBS+= \
+        -L/usr/lib64 -lopencv_core -lopencv_imgproc
 }
+
 
 SOURCES += \
         main.cpp \
