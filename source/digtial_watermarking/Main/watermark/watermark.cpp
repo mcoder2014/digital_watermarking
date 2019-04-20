@@ -14,7 +14,7 @@ Watermark::Watermark():_is_update(false)
 Watermark::Watermark(const Watermark *watermark)
     :_x(watermark->_x), _y(watermark->_y),
       _relative(watermark->_relative),_relative_pos(watermark->_relative_pos),
-      _relative_size(watermark->_relative_size)
+      _relative_size(watermark->_relative_size),_rotation(watermark->_rotation)
 {
     this->setContent(watermark->content());
 }

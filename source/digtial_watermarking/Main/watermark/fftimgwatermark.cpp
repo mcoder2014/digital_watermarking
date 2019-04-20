@@ -127,7 +127,7 @@ void FFTImgWatermark::execute(cv::Mat &src, cv::Mat &dst)
 
     // IDFT - get the added watermark image
 
-    cv::Mat dst_larger_channels[4];
+    std::vector<cv::Mat> dst_larger_channels(4);
 
     // Run fftSingleChannel for RGB channel of the src image
     for(int i = 0 ; i < 3; i++)
@@ -136,7 +136,7 @@ void FFTImgWatermark::execute(cv::Mat &src, cv::Mat &dst)
     dst_larger_channels[3] = src_larger_channels[3].clone();
 
     cv::Mat dst_larger;
-    cv::merge(dst_larger_channels,4, dst_larger);
+    cv::merge(dst_larger_channels, dst_larger);
 
     // RETURN the dst value
     dst = dst_larger(cv::Rect(0,0,src.cols, src.rows)).clone();
@@ -177,7 +177,9 @@ void FFTImgWatermark::fftSingleChannel(const cv::Mat &src, cv::Mat &dst)
 {
     assert(src.channels() == 1);
 
-    cv::Mat planes[] = { cv::Mat_<float>(src), cv::Mat::zeros(src.size(), CV_32F) };
+    cv::Mat plane0;
+    src.convertTo(plane0,CV_32FC1);
+    cv::Mat planes[] = { plane0, cv::Mat::zeros(src.size(), CV_32F) };
     cv::Mat complete;           // two channel
     cv::merge(planes, 2, complete);
     cv::dft(complete, complete);
@@ -195,6 +197,10 @@ void FFTImgWatermark::ifftSingleChannel(const cv::Mat &src, cv::Mat &dst)
     std::vector<cv::Mat> planes;
     cv::split(complete, planes);
 //    dst = planes[0].clone();
+    magnitude(planes[0], planes[1], planes[0]);
+    normalize(planes[0], planes[0], 0, 1, cv::NORM_MINMAX);
+    planes[0] = planes[0]*255;
+
     planes[0].convertTo(dst, CV_8UC1);
 }
 
@@ -205,11 +211,8 @@ void FFTImgWatermark::singleChannelWatermark(
     // Cut the small part of image
     std::vector<cv::Mat> src_larger_fft(3);
     for(int i=0; i < 3; i++)
-        src_larger_fft[i] = (dst[i])(cv::Rect(dst_x, dst_y,
-            watermark.size().width, watermark.size().height));
-//        src_larger_fft.push_back(
-//            (dst[i])(cv::Rect(dst_x,dst_y,
-//                watermark.size().width, watermark.size().height)));
+        src_larger_fft[i] = (dst[i])(
+            cv::Rect(dst_x, dst_y,watermark.size().width, watermark.size().height));
 
     float alpha = this->_alpha/100.0;       // 0-100
     // Merge the unchanged watermark image in the fft image
