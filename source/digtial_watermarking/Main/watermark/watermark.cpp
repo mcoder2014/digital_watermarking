@@ -11,6 +11,14 @@ Watermark::Watermark():_is_update(false)
     this->_relative_size = 0;
 }
 
+Watermark::Watermark(const Watermark *watermark)
+    :_x(watermark->_x), _y(watermark->_y),
+      _relative(watermark->_relative),_relative_pos(watermark->_relative_pos),
+      _relative_size(watermark->_relative_size)
+{
+    this->setContent(watermark->content());
+}
+
 Watermark::~Watermark()
 {
 
@@ -79,4 +87,16 @@ void Watermark::setRelative_pos(bool relative_pos)
 {
     _relative_pos = relative_pos;
     this->_is_update = true;
+}
+
+std::string Watermark::toString()
+{
+    std::string output;
+    output = output + "content: " + this->_content
+            + "\trelative: " + std::to_string(this->_relative)
+            + "\trelative_size: " + std::to_string(this->_relative_size)
+            + "\tpos: " + std::to_string(this->_x) + " " + std::to_string(this->_y)
+            + "\trelative_pos: " + std::to_string(this->_relative_pos)
+            + "\trotation: " + std::to_string(this->_rotation);
+    return output;
 }

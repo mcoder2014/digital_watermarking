@@ -6,9 +6,12 @@ class ImgWatermark : public Watermark
 {
 public:
     ImgWatermark();
+    ImgWatermark(const ImgWatermark* imgwatermark);
+
     virtual void execute(cv::Mat& src, cv::Mat& dst);
     virtual std::string type(){return std::string("ImgWatermark");}
     void print();
+    virtual std::string toString();
 
     void setContent(const std::string &value);
     int size_width() const;
@@ -32,6 +35,7 @@ protected:
     cv::Mat _modifiedWatermark; // the watermark mat modified based on the description.
 
     void _updateWatermarkMat();
+    void _transformWatermark(const cv::Mat& src, cv::Mat& watermark, int& dst_x, int& dst_y);
 };
 
 #endif // IMGWATERMARK_H

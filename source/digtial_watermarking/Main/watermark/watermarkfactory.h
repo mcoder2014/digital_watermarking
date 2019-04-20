@@ -24,6 +24,7 @@ private:
     std::shared_ptr<TextWatermark> getTextWatermark(QJsonObject &json_obj);
     std::shared_ptr<LSBImgWatermark> getLSBImgWatermark(QJsonObject &json_obj);
     std::shared_ptr<PossionImgWatermark> getPossionImgWatermark(QJsonObject &json_obj);
+    std::shared_ptr<FFTImgWatermark> getFFTImgWatermark(QJsonObject &json_obj);
 
 };
 

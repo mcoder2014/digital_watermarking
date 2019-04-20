@@ -11,6 +11,8 @@ public:
     enum Relative{NONE,WIDTH,HEIGHT};                       // 相对尺寸的
 
     Watermark();
+    Watermark(const Watermark* watermark);
+
     ~Watermark();
     virtual void execute(cv::Mat& src, cv::Mat& dst) = 0;   // 执行添加水印方法-对目标图像加水印
     virtual void print() = 0;                                   // 输出参数信息
@@ -34,6 +36,8 @@ public:
 
     bool relative_pos() const;
     void setRelative_pos(bool relative_pos);
+
+    virtual std::string toString();
 
 protected:
     float _x, _y;            // 坐标

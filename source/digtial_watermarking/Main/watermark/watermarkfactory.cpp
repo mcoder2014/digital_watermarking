@@ -45,6 +45,10 @@ std::vector<std::shared_ptr<Watermark> > WatermarkFactory::loadWatermark(const Q
         {
             watermarks.push_back(this->getPossionImgWatermark(obj));
         }
+        else if(type == QString("fft"))
+        {
+            watermarks.push_back((this->getFFTImgWatermark(obj)));
+        }
         else
         {
             qWarning() << "Type: " << type << "is not known!";
@@ -118,52 +122,43 @@ std::shared_ptr<ImgWatermark> WatermarkFactory::getImgWatermark(QJsonObject &jso
         p->setRotation(json_obj["rotation"].toInt());
     }
 
-    p->print();
+//    p->print();
     return p;
 }
 
 std::shared_ptr<TextWatermark> WatermarkFactory::getTextWatermark(QJsonObject &json_obj)
 {
+    std::shared_ptr<TextWatermark> text;
 
+    return text;
 }
 
 std::shared_ptr<PossionImgWatermark> WatermarkFactory::getPossionImgWatermark(QJsonObject &json_obj)
 {
     std::shared_ptr<ImgWatermark> p = this->getImgWatermark(json_obj);
-    std::shared_ptr<PossionImgWatermark> possion = std::make_shared<PossionImgWatermark>();
-
-    possion->setPos(p->x(), p->y());
-    possion->setAlpha(p->alpha());
-    possion->setContent(p->content());
-    possion->setRelative(p->relative());
-    possion->setRotation(p->rotation());
-    possion->setSize_width(p->size_width());
-    possion->setSize_height(p->size_height());
-    possion->setRelative_pos(p->relative_pos());
-    possion->setRelative_size(p->relative_size());
+    std::shared_ptr<PossionImgWatermark> possion = std::make_shared<PossionImgWatermark>(p.get());
 
     return possion;
+}
+
+std::shared_ptr<FFTImgWatermark> WatermarkFactory::getFFTImgWatermark(QJsonObject &json_obj)
+{
+    std::shared_ptr<ImgWatermark> p = this->getImgWatermark(json_obj);
+    std::shared_ptr<FFTImgWatermark> fft = std::make_shared<FFTImgWatermark>(p.get());
+    if(json_obj.contains("rotational_symmetry"))
+        fft->setRotational_symmetry(json_obj["rotational_symmetry"].toBool());
+
+    return fft;
 }
 
 std::shared_ptr<LSBImgWatermark> WatermarkFactory::getLSBImgWatermark(QJsonObject &json_obj)
 {
     std::shared_ptr<ImgWatermark> p = this->getImgWatermark(json_obj);
-    std::shared_ptr<LSBImgWatermark> lsb = std::make_shared<LSBImgWatermark>();
+    std::shared_ptr<LSBImgWatermark> lsb = std::make_shared<LSBImgWatermark>(p.get());
     if(json_obj.contains("bits"))
     {
         lsb->setBits(json_obj["bits"].toInt());
     }
-
-    // Copy info, will change to copy constructor soon.
-    lsb->setPos(p->x(), p->y());
-    lsb->setAlpha(p->alpha());
-    lsb->setContent(p->content());
-    lsb->setRelative(p->relative());
-    lsb->setRotation(p->rotation());
-    lsb->setSize_width(p->size_width());
-    lsb->setSize_height(p->size_height());
-    lsb->setRelative_pos(p->relative_pos());
-    lsb->setRelative_size(p->relative_size());
 
     return lsb;
 }
