@@ -30,6 +30,7 @@ protected:
     void singleChannelWatermark(
             const cv::Mat& watermark, std::vector<cv::Mat>& dst,
             int dst_x, int dst_y);
+    float watermarkPixel2Spectrum(unsigned char pixel, float min, float max);
 };
 
 #endif // FFTIMGWATERMARK_H
