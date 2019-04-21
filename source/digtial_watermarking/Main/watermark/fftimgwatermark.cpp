@@ -51,64 +51,65 @@ void FFTImgWatermark::execute(cv::Mat &src, cv::Mat &dst)
 
     std::vector<cv::Mat> src_larger_fft(3);     // The container to save fft image
 
-    // Ini the container
+    // Remember the max and min value of src image, in order to recover the src image from fft image.
+    double min_src[3];
+    double max_src[3];
+
+    // Run fft transform
     for(int i = 0; i < 3; i++)
     {
-//        src_larger_fft.push_back(cv::Mat());
         // Run fftSingleChannel for RGB channel of the src image
         fftSingleChannel(src_larger_channels[i], src_larger_fft[i]);
+
+        // calculate the max and min value of src image
+        cv::minMaxIdx(src_larger_channels[i], &(min_src[i]),&(max_src[i]));
     }
 
     // Remember the max and min value, to run an anti-normalize transform of watermark
-    double min_src_dft[3];
-    double max_src_dft[3];
-    for(int i=0; i <3; i++)
-    {
-        std::vector<cv::Mat> planes;
-        cv::split(src_larger_fft[i], planes);
+//    double min_src_dft[3];
+//    double max_src_dft[3];
+//    for(int i=0; i <3; i++)
+//    {
+//        std::vector<cv::Mat> planes;
+//        cv::split(src_larger_fft[i], planes);
 
-        cv::magnitude(planes[0], planes[1], planes[0]);
-        cv::Mat mag = planes[0];
-        mag += cv::Scalar::all(1);
-        cv::log(mag, mag);
+//        cv::magnitude(planes[0], planes[1], planes[0]);
+//        cv::Mat mag = planes[0];
+//        mag += cv::Scalar::all(1);
+//        cv::log(mag, mag);
 
-        cv::minMaxIdx(mag, &(min_src_dft[i]),&(max_src_dft[i]));    // Find the max and min value of log image
+//        cv::minMaxIdx(mag, &(min_src_dft[i]),&(max_src_dft[i]));    // Find the max and min value of log image
 
-        /*------------------DEBUG----------------------*/
-        // crop the spectrum, if it has an odd number of rows or columns
-        mag = mag(cv::Rect(0, 0, mag.cols & -2, mag.rows & -2));
+//        /*------------------DEBUG----------------------*/
+//        // crop the spectrum, if it has an odd number of rows or columns
+//        mag = mag(cv::Rect(0, 0, mag.cols & -2, mag.rows & -2));
 
-        int cx = mag.cols/2;
-        int cy = mag.rows/2;
+//        int cx = mag.cols/2;
+//        int cy = mag.rows/2;
 
-        // rearrange the quadrants of Fourier image
-        // so that the origin is at the image center
-        cv::Mat tmp;
-        cv::Mat q0(mag, cv::Rect(0, 0, cx, cy));
-        cv::Mat q1(mag, cv::Rect(cx, 0, cx, cy));
-        cv::Mat q2(mag, cv::Rect(0, cy, cx, cy));
-        cv::Mat q3(mag, cv::Rect(cx, cy, cx, cy));
+//        // rearrange the quadrants of Fourier image
+//        // so that the origin is at the image center
+//        cv::Mat tmp;
+//        cv::Mat q0(mag, cv::Rect(0, 0, cx, cy));
+//        cv::Mat q1(mag, cv::Rect(cx, 0, cx, cy));
+//        cv::Mat q2(mag, cv::Rect(0, cy, cx, cy));
+//        cv::Mat q3(mag, cv::Rect(cx, cy, cx, cy));
 
-        q0.copyTo(tmp);
-        q3.copyTo(q0);
-        tmp.copyTo(q3);
+//        q0.copyTo(tmp);
+//        q3.copyTo(q0);
+//        tmp.copyTo(q3);
 
-        q1.copyTo(tmp);
-        q2.copyTo(q1);
-        tmp.copyTo(q2);
+//        q1.copyTo(tmp);
+//        q2.copyTo(q1);
+//        tmp.copyTo(q2);
 
-        normalize(mag, mag, 0, 1, cv::NORM_MINMAX);
-        mag = mag*255;
-        mag.convertTo(mag, CV_8UC1);
+//        normalize(mag, mag, 0, 1, cv::NORM_MINMAX);
+//        mag = mag*255;
+//        mag.convertTo(mag, CV_8UC1);
 
-        DEBUG_SAVE_MAT(mag, std::string("debug/spectrum_src_") + char('0'+i) + std::string(".png"));
-        /*------------------DEBUG----------------------*/
-    }
-
-
-    /*--Test Strength--*/
-
-    /*-----------------*/
+//        DEBUG_SAVE_MAT(mag, std::string("debug/spectrum_src_") + char('0'+i) + std::string(".png"));
+//        /*------------------DEBUG----------------------*/
+//    }
 
     // Add Watermark into src_larger_fft
     this->singleChannelWatermark(tmp, src_larger_fft, dst_x, dst_y);
@@ -120,18 +121,22 @@ void FFTImgWatermark::execute(cv::Mat &src, cv::Mat &dst)
             cv::flip(src_larger_fft[i],src_larger_fft[i], -1);
         // Add watermark
         this->singleChannelWatermark(tmp, src_larger_fft, dst_x, dst_y);
-        // Recover
+        // Recover Filp
         for(int i=0;i<3;i++)
             cv::flip(src_larger_fft[i],src_larger_fft[i], -1);
     }
 
     // IDFT - get the added watermark image
-
     std::vector<cv::Mat> dst_larger_channels(4);
 
     // Run fftSingleChannel for RGB channel of the src image
     for(int i = 0 ; i < 3; i++)
+    {
         ifftSingleChannel(src_larger_fft[i], dst_larger_channels[i]);
+        dst_larger_channels[i] = dst_larger_channels[i]*(max_src[i] - min_src[i]) + min_src[i];
+        dst_larger_channels[i].convertTo(dst_larger_channels[i], CV_8UC1);
+    }
+
 
     dst_larger_channels[3] = src_larger_channels[3].clone();
 
@@ -196,12 +201,14 @@ void FFTImgWatermark::ifftSingleChannel(const cv::Mat &src, cv::Mat &dst)
 
     std::vector<cv::Mat> planes;
     cv::split(complete, planes);
-//    dst = planes[0].clone();
+
     magnitude(planes[0], planes[1], planes[0]);
     normalize(planes[0], planes[0], 0, 1, cv::NORM_MINMAX);
-    planes[0] = planes[0]*255;
 
-    planes[0].convertTo(dst, CV_8UC1);
+    // direct multple 255, may cause a not good problem.
+//    planes[0] = planes[0]*255;
+//    planes[0].convertTo(dst, CV_8UC1);
+    dst = planes[0].clone();
 }
 
 void FFTImgWatermark::singleChannelWatermark(
