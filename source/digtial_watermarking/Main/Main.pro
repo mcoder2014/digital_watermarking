@@ -74,7 +74,8 @@ SOURCES += \
     watermark/lsbimgwatermark.cpp \
     watermark/unvisiblewatermark.cpp \
     watermark/fftimgwatermark.cpp \
-    watermark/possionimgwatermark.cpp
+    watermark/possionimgwatermark.cpp \
+    watermark/watermarkencoder.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -86,7 +87,8 @@ HEADERS += \
     watermark/lsbimgwatermark.h \
     watermark/unvisiblewatermark.h \
     watermark/fftimgwatermark.h \
-    watermark/possionimgwatermark.h
+    watermark/possionimgwatermark.h \
+    watermark/watermarkencoder.h
 
 FORMS += \
         mainwindow.ui
