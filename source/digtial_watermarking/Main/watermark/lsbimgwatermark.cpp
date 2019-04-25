@@ -10,18 +10,19 @@
 LSBImgWatermark::LSBImgWatermark():ImgWatermark ()
 {
     this->_bits = 2;
+    this->_needSourceImg = false;
 }
 
 LSBImgWatermark::LSBImgWatermark(const ImgWatermark *imgwatermark)
     :ImgWatermark (imgwatermark)
 {
-
+    this->_needSourceImg = false;
 }
 
 LSBImgWatermark::LSBImgWatermark(const LSBImgWatermark *lsbimgwatermark)
     :ImgWatermark (lsbimgwatermark),_bits(lsbimgwatermark->_bits)
 {
-
+    this->_needSourceImg = false;
 }
 
 void LSBImgWatermark::execute(cv::Mat &src, cv::Mat &dst)

@@ -7,23 +7,28 @@
 #include <QDebug>
 
 #include "tools.h"
+#include "watermarkencoder.h"
 
 
 FFTImgWatermark::FFTImgWatermark():ImgWatermark ()
 {
     this->_rotational_symmetry = true;
+    this->_key = 10;
+    this->_needSourceImg = true;
 }
 
 FFTImgWatermark::FFTImgWatermark(const ImgWatermark *imgwatermark)
     :ImgWatermark(imgwatermark)
 {
-
+    this->_key = 10;
+    this->_needSourceImg = true;
 }
 
 FFTImgWatermark::FFTImgWatermark(const FFTImgWatermark *fftimgwatermark)
     :ImgWatermark (fftimgwatermark)
 {
-
+    this->_key = 10;
+    this->_needSourceImg = true;
 }
 
 void FFTImgWatermark::execute(cv::Mat &src, cv::Mat &dst)
@@ -43,7 +48,7 @@ void FFTImgWatermark::execute(cv::Mat &src, cv::Mat &dst)
 
     // add zeros to larger src image for good performance
     cv::Mat src_larger;
-    cv::copyMakeBorder(src, src_larger, 0, recommend_height-src.rows, 0, recommend_width-src.cols, cv::BORDER_CONSTANT, cv::Scalar::all(0));
+    cv::copyMakeBorder(dst, src_larger, 0, recommend_height-src.rows, 0, recommend_width-src.cols, cv::BORDER_CONSTANT, cv::Scalar::all(0));
 
     // split to BGRA and only do fft in BGR channels
     std::vector<cv::Mat> src_larger_channels;
@@ -65,83 +70,34 @@ void FFTImgWatermark::execute(cv::Mat &src, cv::Mat &dst)
         cv::minMaxIdx(src_larger_channels[i], &(min_src[i]),&(max_src[i]));
     }
 
-    // Remember the max and min value, to run an anti-normalize transform of watermark
-//    double min_src_dft[3];
-//    double max_src_dft[3];
-//    for(int i=0; i <3; i++)
-//    {
-//        std::vector<cv::Mat> planes;
-//        cv::split(src_larger_fft[i], planes);
-
-//        cv::magnitude(planes[0], planes[1], planes[0]);
-//        cv::Mat mag = planes[0];
-//        mag += cv::Scalar::all(1);
-//        cv::log(mag, mag);
-
-//        cv::minMaxIdx(mag, &(min_src_dft[i]),&(max_src_dft[i]));    // Find the max and min value of log image
-
-//        /*------------------DEBUG----------------------*/
-//        // crop the spectrum, if it has an odd number of rows or columns
-//        mag = mag(cv::Rect(0, 0, mag.cols & -2, mag.rows & -2));
-
-//        int cx = mag.cols/2;
-//        int cy = mag.rows/2;
-
-//        // rearrange the quadrants of Fourier image
-//        // so that the origin is at the image center
-//        cv::Mat tmp;
-//        cv::Mat q0(mag, cv::Rect(0, 0, cx, cy));
-//        cv::Mat q1(mag, cv::Rect(cx, 0, cx, cy));
-//        cv::Mat q2(mag, cv::Rect(0, cy, cx, cy));
-//        cv::Mat q3(mag, cv::Rect(cx, cy, cx, cy));
-
-//        q0.copyTo(tmp);
-//        q3.copyTo(q0);
-//        tmp.copyTo(q3);
-
-//        q1.copyTo(tmp);
-//        q2.copyTo(q1);
-//        tmp.copyTo(q2);
-
-//        normalize(mag, mag, 0, 1, cv::NORM_MINMAX);
-//        mag = mag*255;
-//        mag.convertTo(mag, CV_8UC1);
-
-//        DEBUG_SAVE_MAT(mag, std::string("debug/spectrum_src_") + char('0'+i) + std::string(".png"));
-//        /*------------------DEBUG----------------------*/
-//    }
+    // Encode watermark image
+    cv::Mat watermark_encode;
+    this->watermarkEncode(tmp,watermark_encode,src_larger,dst_x,dst_y,this->_key);
+    DEBUG_SAVE_MAT(watermark_encode, "debug/watermark_encoded.png");
 
     // Add Watermark into src_larger_fft
-    this->singleChannelWatermark(tmp, src_larger_fft, dst_x, dst_y);
-
-    if(this->_rotational_symmetry)
-    {
-        // Flip
-        for(int i=0;i<3;i++)
-            cv::flip(src_larger_fft[i],src_larger_fft[i], -1);
-        // Add watermark
-        this->singleChannelWatermark(tmp, src_larger_fft, dst_x, dst_y);
-        // Recover Filp
-        for(int i=0;i<3;i++)
-            cv::flip(src_larger_fft[i],src_larger_fft[i], -1);
-    }
+    this->mergeWatermark(watermark_encode, src_larger_fft);
 
     /*--Debug output the dst added watermark--*/
-    {
-        std::vector<cv::Mat> src_large_fft_sp(3);
-        for(int i=0; i<3; i++)
-        {
-            std::vector<cv::Mat> planes;
-            cv::split(src_larger_fft[i], planes);
-            planes[0].convertTo(src_large_fft_sp[i], CV_8UC1);
+//    {
+//        std::vector<cv::Mat> src_large_fft_sp(3);
+//        for(int i=0; i<3; i++)
+//        {
+//            std::vector<cv::Mat> planes;
+//            cv::split(src_larger_fft[i], planes);
+//            cv::magnitude(planes[0], planes[1],planes[0]);
+//            planes[0] += cv::Scalar::all(1);
+//            cv::log(planes[0], planes[0]);
+//            cv::normalize(planes[0], planes[0],0,255,cv::NORM_MINMAX);
+//            planes[0].convertTo(src_large_fft_sp[i], CV_8UC1);
 
-            DEBUG_SAVE_MAT(src_large_fft_sp[i],
-                std::string("debug/sp_added_watermark_") + char('0'+i) + std::string(".png"));
-        }
-        cv::Mat test;
-        cv::merge(src_large_fft_sp, test);
-        DEBUG_SAVE_MAT(test, "debug/sp_added_watermark_merge.png");
-    }
+//            DEBUG_SAVE_MAT(src_large_fft_sp[i],
+//                std::string("debug/sp_added_watermark_") + char('0'+i) + std::string(".png"));
+//        }
+//        cv::Mat test;
+//        cv::merge(src_large_fft_sp, test);
+//        DEBUG_SAVE_MAT(test, "debug/sp_added_watermark_merge.png");
+//    }
     /*----------------------------------------*/
 
     // IDFT - get the added watermark image
@@ -151,10 +107,10 @@ void FFTImgWatermark::execute(cv::Mat &src, cv::Mat &dst)
     for(int i = 0 ; i < 3; i++)
     {
         ifftSingleChannel(src_larger_fft[i], dst_larger_channels[i]);
-        dst_larger_channels[i] = dst_larger_channels[i]*(max_src[i] - min_src[i]) + min_src[i];
+//        dst_larger_channels[i] = dst_larger_channels[i]*(max_src[i] - min_src[i]) + min_src[i];
+        cv::normalize(dst_larger_channels[i], dst_larger_channels[i], min_src[i], max_src[i], cv::NORM_MINMAX);
         dst_larger_channels[i].convertTo(dst_larger_channels[i], CV_8UC1);
     }
-
 
     dst_larger_channels[3] = src_larger_channels[3].clone();
 
@@ -163,93 +119,113 @@ void FFTImgWatermark::execute(cv::Mat &src, cv::Mat &dst)
 
     // RETURN the dst value
     dst = dst_larger(cv::Rect(0,0,src.cols, src.rows)).clone();
+
+//    // Test
+//    this->setSourceImg(src);
+//    checkWatermark(src,dst);
 }
 
+///
+/// \brief FFTImgWatermark::checkWatermark
+/// \param src
+/// \param dst
+/// Will find a function to calculate the different resolution
+///
 void FFTImgWatermark::checkWatermark(const cv::Mat &src, cv::Mat &dst)
 {
-    // 3. Merge Watermark
-    src.convertTo(dst, CV_8UC4);    // Change dst mat type
+    // Get the copy of two image
+    cv::Mat check_img = src.clone();            // the image need to be checked
+    cv::Mat origin_img = this->_src.clone();    // the origin image
 
-    //    cv::Mat Roi = dst(cv::Rect(dst_x,dst_y,tmp.size().width,tmp.size().height));
-    int recommend_height = cv::getOptimalDFTSize(src.rows);
-    int recommend_width = cv::getOptimalDFTSize(src.cols);
+    //  convert to RGBA channels, make sure it has RGB channel
+    check_img.convertTo(check_img, CV_8UC4);
+    origin_img.convertTo(origin_img, CV_8UC4);
 
-    // add zeros to larger src image for good performance
-    cv::Mat src_larger;
-    cv::copyMakeBorder(src, src_larger, 0, recommend_height-src.rows, 0, recommend_width-src.cols, cv::BORDER_CONSTANT, cv::Scalar::all(0));
+    // Get the recommend_size of fft
+    int origin_recommend_height = cv::getOptimalDFTSize(origin_img.rows);
+    int origin_recommend_width = cv::getOptimalDFTSize(origin_img.cols);
+
+    // expand the size of image to recommend
+    cv::Mat check_large, origin_large;
+
+    cv::copyMakeBorder(check_img, check_large,
+        0, origin_recommend_height-check_img.rows,0, origin_recommend_width-check_img.cols,
+        cv::BORDER_CONSTANT, cv::Scalar::all(0));
+    cv::copyMakeBorder(origin_img, origin_large,
+        0, origin_recommend_height-origin_img.rows,0, origin_recommend_width-origin_img.cols,
+        cv::BORDER_CONSTANT, cv::Scalar::all(0));
 
     // split to BGRA and only do fft in BGR channels
-    std::vector<cv::Mat> src_larger_channels;
-    cv::split(src_larger, src_larger_channels);
+    std::vector<cv::Mat> check_large_channels;
+    std::vector<cv::Mat> origin_large_channels;
 
-    std::vector<cv::Mat> src_larger_fft(3);         // The container to save fft image
-    std::vector<cv::Mat> src_larger_normalized(3);  // Normalized to [0,255] CV_8UC1
-    std::vector<cv::Mat> src_larger_direct(3);      // Directed to  CV_8UC1
+    cv::split(check_large, check_large_channels);
+    cv::split(origin_large, origin_large_channels);
 
-    // Run fft transform
-    for(int i = 0; i < 3; i++)
+    // fft RGB channels
+    for (int i=0; i<3; i++)
     {
-        // Run fftSingleChannel for RGB channel of the src image
-        fftSingleChannel(src_larger_channels[i], src_larger_fft[i]);
-
-        // Normalize
-        std::vector<cv::Mat> planes;
-        cv::split(src_larger_fft[i], planes);
-
-        // Direct record
-        src_larger_direct[i] = planes[0].clone();
-        src_larger_direct[i].convertTo(src_larger_direct[i], CV_8UC1);
-
-        DEBUG_SAVE_MAT(src_larger_direct[i],
-            std::string("debug/check_direct_spectrum_src_") + char('0'+i) + std::string(".png"));
-
-        cv::magnitude(planes[0], planes[1], planes[0]);
-        cv::Mat mag = planes[0];
-        mag += cv::Scalar::all(1);
-        cv::log(mag, mag);
-
-        // crop the spectrum, if it has an odd number of rows or columns
-        mag = mag(cv::Rect(0, 0, mag.cols & -2, mag.rows & -2));
-
-        int cx = mag.cols/2;
-        int cy = mag.rows/2;
-
-        // rearrange the quadrants of Fourier image
-        // so that the origin is at the image center
-        cv::Mat tmp;
-        cv::Mat q0(mag, cv::Rect(0, 0, cx, cy));
-        cv::Mat q1(mag, cv::Rect(cx, 0, cx, cy));
-        cv::Mat q2(mag, cv::Rect(0, cy, cx, cy));
-        cv::Mat q3(mag, cv::Rect(cx, cy, cx, cy));
-
-        q0.copyTo(tmp);
-        q3.copyTo(q0);
-        tmp.copyTo(q3);
-
-        q1.copyTo(tmp);
-        q2.copyTo(q1);
-        tmp.copyTo(q2);
-
-        // Normalize to [0,255]
-        normalize(mag, mag, 0, 1, cv::NORM_MINMAX);
-        mag = mag*255;
-        mag.convertTo(mag, CV_8UC1);
-        src_larger_normalized[i] = mag.clone();
-
-        DEBUG_SAVE_MAT(mag,
-            std::string("debug/check_spectrum_src_") + char('0'+i) + std::string(".png"));
-        /*------------------DEBUG----------------------*/
+        fftSingleChannel(check_large_channels[i], check_large_channels[i]);
+        fftSingleChannel(origin_large_channels[i], origin_large_channels[i]);
     }
 
-    // merge and output test
-    cv::Mat tmp;
-    cv::merge(src_larger_direct, tmp);
-    DEBUG_SAVE_MAT(tmp, std::string("debug/check_spectrum_src_merge.png"));
+    // Get the encode_watermark
+    std::vector<cv::Mat> encode_watermark_channels(3);
+    // Init watermark with the size of origin_recommend
+    for(int i=0;i<3;i++)
+    {
+        cv::Mat tmp = cv::Mat::zeros(origin_recommend_height, origin_recommend_width, CV_32F);
+        encode_watermark_channels[i] = tmp.clone();
+    }
+    encode_watermark_channels.push_back(cv::Mat::zeros(origin_recommend_height, origin_recommend_width, CV_8UC1));
+//    encode_watermark_channels[3] = encode_watermark_channels[3] * 255;
 
-    cv::merge(src_larger_normalized, tmp);
-    DEBUG_SAVE_MAT(tmp, std::string("debug/check_direct_spectrum_src_merge.png"));
+    // Compute the difference between the Check image and origin iamge
+    for(int row=0; row<origin_recommend_height; row++)
+    {
+        for(int col=0; col<origin_recommend_width; col++)
+        {
+            for (int i=0;i<3;i++)
+            {
+                // RGB
+                cv::Vec2f check_pixel = check_large_channels[i].at<cv::Vec2f>(row, col);
+                cv::Vec2f origin_pixel = origin_large_channels[i].at<cv::Vec2f>(row, col);
 
-    dst = tmp.clone();
+//                float watermark_pixel = encode_watermark_channels[i].at<float>(row, col);
+                float watermark_pixel = check_pixel[0] - origin_pixel[0];
+                if(fabs(watermark_pixel) > 0.00001)
+                {
+                    encode_watermark_channels[4].at<uchar>(row,col) = (uchar)255;
+                }
+                encode_watermark_channels[i].at<float>(row, col) = watermark_pixel;
+            }
+        }
+    }
+
+
+    // Convert watermark to CV_8UC
+    for (int i=0; i<3; i++)
+    {
+        qDebug() << "mean: " << cv::mean(encode_watermark_channels[i])[0];
+
+        cv::magnitude(encode_watermark_channels[i], encode_watermark_channels[i], encode_watermark_channels[i]);
+        encode_watermark_channels[i] +=cv::Scalar::all(1);
+        cv::log(encode_watermark_channels[i],encode_watermark_channels[i]);
+
+        normalize(encode_watermark_channels[i], encode_watermark_channels[i], 0, 255, cv::NORM_MINMAX);
+        encode_watermark_channels[i] = encode_watermark_channels[i] * 255;
+        encode_watermark_channels[i].convertTo(encode_watermark_channels[i],CV_8UC1);
+    }
+
+    cv::Mat encode_watermark;
+    cv::merge(encode_watermark_channels, encode_watermark);
+    DEBUG_SAVE_MAT(encode_watermark, "debug/fft_check_encode_watermark.png");
+
+    cv::Mat watermark;
+    this->watermarkDecode(encode_watermark, watermark, this->_key);
+    DEBUG_SAVE_MAT(watermark, "debug/fft_check_watermark.png");
+
+    dst = watermark.clone();
 }
 
 bool FFTImgWatermark::rotational_symmetry() const
@@ -271,6 +247,16 @@ std::string FFTImgWatermark::toString()
     return output;
 }
 
+uint64_t FFTImgWatermark::key() const
+{
+    return _key;
+}
+
+void FFTImgWatermark::setKey(const uint64_t &key)
+{
+    _key = key;
+}
+
 ///
 /// \brief FFTImgWatermark::fftSingleChannel
 /// \param src
@@ -287,6 +273,7 @@ void FFTImgWatermark::fftSingleChannel(const cv::Mat &src, cv::Mat &dst)
     cv::Mat planes[] = { plane0, cv::Mat::zeros(src.size(), CV_32F) };
     cv::Mat complete;           // two channel
     cv::merge(planes, 2, complete);
+//    cv::dft(complete, complete, cv::DFT_INVERSE | cv::DFT_SCALE, 0);
     cv::dft(complete, complete);
 
     dst = complete.clone();
@@ -297,13 +284,14 @@ void FFTImgWatermark::ifftSingleChannel(const cv::Mat &src, cv::Mat &dst)
     assert(src.channels() == 2);
 
     cv::Mat complete = src.clone();
+//    cv::idft(complete, complete, cv::DFT_INVERSE | cv::DFT_SCALE, 0);
     cv::idft(complete, complete);
 
     std::vector<cv::Mat> planes;
     cv::split(complete, planes);
 
 //    magnitude(planes[0], planes[1], planes[0]);
-    normalize(planes[0], planes[0], 0, 1, cv::NORM_MINMAX);
+//    normalize(planes[0], planes[0], 0, 1, cv::NORM_MINMAX);
 
     // direct multple 255, may cause a not good problem.
 //    planes[0] = planes[0]*255;
@@ -311,73 +299,77 @@ void FFTImgWatermark::ifftSingleChannel(const cv::Mat &src, cv::Mat &dst)
     dst = planes[0].clone();
 }
 
-void FFTImgWatermark::singleChannelWatermark(
-        const cv::Mat &watermark, std::vector<cv::Mat> &dst,
-        int dst_x, int dst_y)
+///
+/// \brief FFTImgWatermark::mergeWatermark
+/// \param watermark
+/// \param dsts
+/// Add encoded watermark image to fft image dsts
+void FFTImgWatermark::mergeWatermark(const cv::Mat &watermark, std::vector<cv::Mat> dsts)
 {
-    // Cut the small part of image
-    std::vector<cv::Mat> src_larger_fft(3);
-    double min_src_fft[3];
-    double max_src_fft[3];
-    for(int i=0; i < 3; i++)
+    float alpha = this->_alpha/100.0;       // the strength of watermark
+    int rows = watermark.rows;
+    int cols = watermark.cols;
+    qDebug() << "Add watermark on fft result of origin image, watermark width: "
+             << cols
+             << " watermark height: " << rows;
+
+    for (int row=0; row < rows; row++)
     {
-        cv::Mat tmp;
-        std::vector<cv::Mat> tmp_channels;
-        cv::split(dst[i], tmp_channels);
-        cv::magnitude(tmp_channels[0], tmp_channels[1],tmp);
-        tmp += cv::Scalar::all(1);
-        cv::log(tmp, tmp);
-
-        cv::minMaxIdx(tmp,&(min_src_fft[i]), &(max_src_fft[i]));
-
-        qDebug() << "dst[" << i << "]" << "max: " << max_src_fft[i] << " min: " << min_src_fft[i];
-        src_larger_fft[i] = (dst[i])(
-            cv::Rect(dst_x, dst_y,watermark.size().width, watermark.size().height));
-    }
-
-    float alpha = this->_alpha/100.0;       // 0-100
-    // Merge the unchanged watermark image in the fft image
-    for(int i=0; i <watermark.rows; i++)
-    {
-        for(int j=0; j<watermark.cols; j++)
+        for (int col=0; col < cols; col++)
         {
-            // watermark
-            cv::Vec4b wm_pixel = watermark.at<cv::Vec4b>(i,j);
-            float real_alpha = alpha * (wm_pixel[3]/255);
+            cv::Vec4b watermark_pixel = watermark.at<cv::Vec4b>(row, col);
 
-            // B
-            cv::Vec2f dst_pixel_b = src_larger_fft[0].at<cv::Vec2f>(i,j);
-            float wm_b = watermarkPixel2Spectrum(wm_pixel[0],min_src_fft[0],max_src_fft[0]);
-            dst_pixel_b[0] = (1-real_alpha)*dst_pixel_b[0] + real_alpha * wm_b;
-            dst_pixel_b[1] = (1-real_alpha)*dst_pixel_b[1] + real_alpha * wm_b;
-
-            src_larger_fft[0].at<cv::Vec2f>(i,j) = dst_pixel_b;
-
-            // G
-            cv::Vec2f dst_pixel_g = src_larger_fft[1].at<cv::Vec2f>(i,j);
-            float wm_g = watermarkPixel2Spectrum(wm_pixel[1],min_src_fft[1],max_src_fft[1]);
-            dst_pixel_g[0] = (1-real_alpha)*dst_pixel_g[0] + real_alpha * wm_g;
-            dst_pixel_g[1] = (1-real_alpha)*dst_pixel_g[1] + real_alpha * wm_g;
-
-            src_larger_fft[1].at<cv::Vec2f>(i,j) = dst_pixel_g;
-
-            // R
-            cv::Vec2f dst_pixel_r = src_larger_fft[2].at<cv::Vec2f>(i,j);
-            float wm_r = watermarkPixel2Spectrum(wm_pixel[2],min_src_fft[2],max_src_fft[2]);
-            dst_pixel_r[0] = (1-real_alpha)*dst_pixel_r[0] + real_alpha * wm_r;
-            dst_pixel_r[1] = (1-real_alpha)*dst_pixel_r[1] + real_alpha * wm_r;
-
-            src_larger_fft[2].at<cv::Vec2f>(i,j) = dst_pixel_r;
+            for (int i=0; i<3; i++)
+            {
+                // BGR
+                cv::Vec2f dst_pixel = dsts[i].at<cv::Vec2f>(row, col);
+                dst_pixel[0] = dst_pixel[0] + alpha * watermark_pixel[i];
+                dst_pixel[1] = dst_pixel[1] + alpha * watermark_pixel[i];
+                dsts[i].at<cv::Vec2f>(row, col) = dst_pixel;
+            }
         }
     }
 }
 
-float FFTImgWatermark::watermarkPixel2Spectrum(unsigned char pixel, float min, float max)
+///
+/// \brief FFTImgWatermark::watermarkEncode
+/// \param watermark
+/// \param dst
+/// \param src
+/// \param dst_x
+/// \param dst_y
+/// \param key
+///
+void FFTImgWatermark::watermarkEncode(const cv::Mat &watermark, cv::Mat &dst, cv::Mat &src, int dst_x, int dst_y, uint64_t key)
 {
-    float watermark = (float)pixel;
-    watermark = ((max-min)/255)*watermark + min;
-//    watermark = cv::exp(watermark);
-//    watermark = watermark/sqrt(2);
+    // Create canvas, and draw watermark on canvas, end with encode image
+    cv::Mat watermark_canvas = cv::Mat::zeros(src.size().height, src.size().width,CV_8UC4);
 
-    return watermark;
+    cv::Mat roi = watermark_canvas(cv::Rect(dst_x, dst_y, watermark.size().width,watermark.size().height));
+    watermark.copyTo(roi);
+
+    if(this->_rotational_symmetry)
+    {
+        // Flip
+        cv::flip(watermark_canvas,watermark_canvas, -1);
+
+        // Add watermark
+        cv::Mat _roi = watermark_canvas(cv::Rect(dst_x, dst_y, watermark.size().width,watermark.size().height));
+        watermark.copyTo(roi);
+
+        // Recover Filp
+        cv::flip(watermark_canvas,watermark_canvas, -1);
+    }
+
+    WatermarkEncoder encoder;
+    encoder.encode(watermark_canvas, watermark_canvas, key);
+
+    dst = watermark_canvas.clone();
 }
+
+void FFTImgWatermark::watermarkDecode(const cv::Mat &src, cv::Mat &dst, uint64_t key)
+{
+    WatermarkEncoder decoder;
+    decoder.decode(src, dst, key);
+}
+

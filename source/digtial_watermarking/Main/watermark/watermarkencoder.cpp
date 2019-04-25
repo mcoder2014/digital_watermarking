@@ -17,14 +17,14 @@ void WatermarkEncoder::encode(const cv::Mat &src, cv::Mat &dst, uint64_t key)
     this->seed = key;       // update key
 
     size_t width = src.size().width;                 // Width of src image
-    size_t half_height = src.size().height / 2;      // Half Height of src image
+    size_t height = src.size().height;      // Half Height of src image
 
     std::vector<int> W_index(width);
-    std::vector<int> H_index(half_height);
+    std::vector<int> H_index(height);
 
     for(int i=0; i<width; i++)
         W_index[i] = i;
-    for(int i=0; i<half_height; i++)
+    for(int i=0; i<height; i++)
         H_index[i]=i;
 
     // I want use fake rand to make sure with same key and same size,
@@ -33,7 +33,7 @@ void WatermarkEncoder::encode(const cv::Mat &src, cv::Mat &dst, uint64_t key)
     fresh(H_index);
 
     cv::Mat tmp = src.clone();
-    for (int i=0; i<half_height; i++)
+    for (int i=0; i<height; i++)
     {
         for (int j=0; j<width; j++) {
             // Change pixel based on W_index and H_index
@@ -41,9 +41,9 @@ void WatermarkEncoder::encode(const cv::Mat &src, cv::Mat &dst, uint64_t key)
             tmp.at<cv::Vec4b>(i,j) = pixel;
         }
     }
-    cv::Mat half_upper = tmp(cv::Rect(0,0,width,half_height));
-    cv::Mat half_below = tmp(cv::Rect(0,half_height,width,half_height));
-    cv::flip(half_upper,half_below,1);          // Flip
+//    cv::Mat half_upper = tmp(cv::Rect(0,0,width,half_height));
+//    cv::Mat half_below = tmp(cv::Rect(0,half_height,width,half_height));
+//    cv::flip(half_upper,half_below,-1);          // Flip
 
     // Clone and return
     dst = tmp.clone();
@@ -54,14 +54,14 @@ void WatermarkEncoder::decode(const cv::Mat &src, cv::Mat &dst, uint64_t key)
     this->seed = key;       // update key
 
     size_t width = src.size().width;                 // Width of src image
-    size_t half_height = src.size().height / 2;      // Half Height of src image
+    size_t height = src.size().height;      // Half Height of src image
 
     std::vector<int> W_index(width);
-    std::vector<int> H_index(half_height);
+    std::vector<int> H_index(height);
 
     for(int i=0; i<width; i++)
         W_index[i] = i;
-    for(int i=0; i<half_height; i++)
+    for(int i=0; i<height; i++)
         H_index[i]=i;
 
     // I want use fake rand to make sure with same key and same size,
@@ -70,7 +70,7 @@ void WatermarkEncoder::decode(const cv::Mat &src, cv::Mat &dst, uint64_t key)
     fresh(H_index);
 
     cv::Mat tmp = src.clone();
-    for (int i=0; i<half_height; i++)
+    for (int i=0; i<height; i++)
     {
         for (int j=0; j<width; j++) {
             // Change pixel based on W_index and H_index
@@ -79,9 +79,9 @@ void WatermarkEncoder::decode(const cv::Mat &src, cv::Mat &dst, uint64_t key)
         }
     }
 
-    cv::Mat half_upper = tmp(cv::Rect(0,0,width,half_height));
-    cv::Mat half_below = tmp(cv::Rect(0,half_height,width,half_height));
-    cv::flip(half_upper,half_below,1);          // Flip
+//    cv::Mat half_upper = tmp(cv::Rect(0,0,width,half_height));
+//    cv::Mat half_below = tmp(cv::Rect(0,half_height,width,half_height));
+//    cv::flip(half_upper,half_below,-1);          // Flip
 
     // Clone and return
     dst = tmp.clone();

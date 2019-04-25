@@ -91,4 +91,5 @@ void DEBUG_SAVE_MAT(const cv::Mat &mat, std::string savepath)
 {
     QImage save_image = cvMat2QImage(mat);
     save_image.save(QString::fromStdString(savepath));
+    qDebug() << "SaveImage:" << QString::fromStdString(savepath);
 }
